@@ -7,8 +7,9 @@ A **solid lower half of the apple**, derived from the original mesh.
 - Uniform 1.5x scale, so the apple keeps its exact round shape — no stretching.
 - Only the body below z = 0 is kept, with a flat closed top at z = 0.
 - The source apple's flat base was sculpted into a rounded apple bottom: a
-  spherical cap 3 mm deeper at the centre plus a 4 mm wide, 2 mm deep calyx
-  dimple. The rest of the apple shape is untouched.
+  spherical cap 3 mm deeper at the centre, a 4 mm wide, 2 mm deep calyx dimple,
+  and three smooth 4 mm calyx lobes at 0/120/240 degrees. The rest of the
+  apple shape is untouched.
 - No cavity, shelves, tabs, display window, power/switch holes or chain-ring
   hole. No stem or leaf. It is one solid piece.
 
@@ -18,5 +19,9 @@ A **solid lower half of the apple**, derived from the original mesh.
 
 ```
 snap run freecad.cmd ./build_full_bottom.py
+python3 sculpt_lobes.py
 python3 verify_full_bottom.py
 ```
+
+`full_bottom.step` is the pre-lobe CAD solid; `full_bottom.stl` is the
+printable, sculpted version.

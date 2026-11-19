@@ -85,12 +85,14 @@ print(f'full_bottom.stl: tris={len(tri)} comps={comps} open={opens} '
       f'nonmanifold={bad} x[{min(xs):.1f},{max(xs):.1f}] '
       f'y[{min(ys):.1f},{max(ys):.1f}] z[{min(zs):.2f},{max(zs):.2f}]')
 ok &= comps == 1 and opens == 0 and bad == 0
-ok &= abs(min(zs) + 28.94) < 0.4 and abs(max(zs)) < 0.3   # rounded base, flat top at z=0
+ok &= -34 < min(zs) < -28 and abs(max(zs)) < 0.3   # lobed base, flat top at z=0
 ok &= max(xs) > 33 and max(ys) > 33                        # full width retained
 
 # sculpted base: dimple at the centre, rounded shoulders out to the apple wall
-def bottom_z(r):
-    h = hits(tri, (r, 0, -45), (0, 0, 1))
+def bottom_z(r, deg=0):
+    import math
+    a = math.radians(deg)
+    h = hits(tri, (r*math.cos(a), r*math.sin(a), -45), (0, 0, 1))
     return -45 + h[0] if h else None
 
 z0, z4, z20, z26 = (bottom_z(r) for r in (0, 4, 20, 26))
@@ -101,6 +103,16 @@ rounded = z20 is not None and z26 is not None and z20 < z26 - 0.8
 print(f'  calyx dimple: {"PASS" if dimple else "FAIL"}   '
       f'rounded base: {"PASS" if rounded else "FAIL"}')
 ok &= dimple and rounded
+
+# three lobes: base is lower at 0/120/240 degrees than between them
+tips = [bottom_z(18, d) for d in (0, 120, 240)]
+mid = [bottom_z(18, d) for d in (60, 180, 300)]
+three = all(t is not None and m is not None and t < m - 1.0
+            for t, m in zip(tips, mid))
+print(f'  three calyx lobes: {"PASS" if three else "FAIL"} '
+      f'tips={[round(t,2) if t else None for t in tips]} '
+      f'between={[round(m,2) if m else None for m in mid]}')
+ok &= three
 
 # solid all the way through: ray hits only the base and the flat top
 h = sorted({round(-45 + d, 2) for d in hits(tri, (10, 0, -45), (0, 0, 1))})
