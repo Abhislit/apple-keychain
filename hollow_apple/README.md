@@ -37,7 +37,10 @@ electronics. The source STL is never modified.
 - Two small internal shelves (OLED edge tabs + electronics platform).
 - 5 mm chain-ring hole through the thickest part of the leaf (right prong,
   x = 15, z = 33.3), with about 2.7 mm of wall around it.
-- Outputs: `shell.stl` (apple above the seam), `cap.stl` (bottom closure).
+- Outputs: `shell.stl` (apple above the seam), `cap.stl` (bottom closure), and
+  `apple_complete_hollow.stl` — the **whole apple as one hollow piece** with its
+  natural bottom closed and no flat cut seam. Same window, power, switch,
+  shelves and leaf hole; ~2.6 mm bottom wall.
 
 ## Print
 - Shell: seam-down on the bed.

@@ -94,6 +94,15 @@ def ray(pts, f, label, o, d, ok_fn):
 ps, fs, ok = report('shell.stl', load(os.path.join(HERE, 'shell.stl')))
 pc, fc, okc = report('cap.stl', load(os.path.join(HERE, 'cap.stl')))
 ok &= okc
+pa, fa, oka = report('apple_complete_hollow.stl',
+                     load(os.path.join(HERE, 'apple_complete_hollow.stl')))
+ok &= oka
+
+print('--- complete hollow apple ---')
+ok &= ray(pa, fa, 'natural bottom closed', (0, 0, -40), (0, 0, 1),
+          lambda h: h and 12 < h[0] < 16)          # outer skin at z ~ -25.9
+ok &= ray(pa, fa, 'hollow above bottom', (0, 0, -40), (0, 0, 1),
+          lambda h: len(h) > 1 and 2 < h[1]-h[0] < 5)  # ~2.6 mm bottom wall
 
 print('--- openings / clearances ---')
 ok &= ray(ps, fs, 'OLED active window open', (0, -45, 0), (0, 1, 0),

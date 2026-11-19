@@ -139,6 +139,8 @@ def save(shape, name):
     print(f'   {name}.stl facets={chk.CountFacets}', flush=True)
 
 
+# the unsplit shell is the complete apple: hollow inside, natural bottom closed
+save(shell, 'apple_complete_hollow')
 save(parts, 'shell')
 save(cap, 'cap')
 print(f'overlap vol={parts.common(cap).Volume:.4f} mm3', flush=True)
