@@ -6,9 +6,13 @@ coincident vertices move together and the mesh stays watertight.
 import math
 import os
 import struct
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PATH = os.path.join(HERE, 'full_bottom.stl')
+NAME = sys.argv[1] if len(sys.argv) > 1 else 'full_bottom'
+LOBES = int(sys.argv[2]) if len(sys.argv) > 2 else 3
+DEPTH = float(sys.argv[3]) if len(sys.argv) > 3 else 4.0
+PATH = os.path.join(HERE, NAME + '.stl')
 
 
 def smooth(a, b, t):
@@ -25,10 +29,10 @@ for i in range(n):
         o = f + 12 + 12 * v
         x, y, z = struct.unpack_from('<3f', data, o)
         r = math.hypot(x, y)
-        lobe = 0.5 + 0.5 * math.cos(3 * math.atan2(y, x))
+        lobe = 0.5 + 0.5 * math.cos(LOBES * math.atan2(y, x))
         weight = (smooth(6, 12, r) * (1 - smooth(22, 28, r)) *
                   max(0.0, min(1.0, (-24 - z) / 4)))
-        z = z - 4.0 * lobe * weight
+        z = z - DEPTH * lobe * weight
         struct.pack_into('<3f', data, o, x, y, z)
         tri.append((x, y, z))
     a, b, c = tri
@@ -42,4 +46,4 @@ for i in range(n):
 
 with open(PATH, 'wb') as fh:
     fh.write(data)
-print(f'sculpted {n} facets')
+print(f'sculpted {n} facets, {LOBES} lobes, {DEPTH} mm deep')

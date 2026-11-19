@@ -11,6 +11,7 @@ import Part, Mesh, MeshPart, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, 'apple_original.stl')
 OUT = HERE
+OUT_NAME = os.environ.get('APPLE_OUT', 'full_bottom')
 S = 1.50          # same uniform scale as the hollow model
 
 m = Mesh.Mesh(SRC)
@@ -99,11 +100,11 @@ print(f'refined: valid={lower.isValid()} solids={len(lower.Solids)} '
 if not lower.isValid() or len(lower.Solids) != 1:
     raise SystemExit(9)
 
-Part.export([lower], os.path.join(OUT, 'full_bottom.step'))
+Part.export([lower], os.path.join(OUT, OUT_NAME + '.step'))
 mesh = MeshPart.meshFromShape(Shape=lower, LinearDeflection=0.06,
                               AngularDeflection=0.4, Relative=False)
-path = os.path.join(OUT, 'full_bottom.stl')
+path = os.path.join(OUT, OUT_NAME + '.stl')
 mesh.write(path)
 
 chk = Mesh.Mesh(path)
-print(f'full_bottom.stl facets={chk.CountFacets}', flush=True)
+print(f'{OUT_NAME}.stl facets={chk.CountFacets}', flush=True)

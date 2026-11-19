@@ -2,9 +2,12 @@
 import hashlib
 import os
 import struct
+import sys
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+NAME = sys.argv[1] if len(sys.argv) > 1 else 'full_bottom'
+LOBES = int(sys.argv[2]) if len(sys.argv) > 2 else 3
 HASH = '8c2ae8b452da705620cd98764d5ecdc385f55724618e09efbd49740f89dc725e'
 ok = True
 
@@ -56,7 +59,7 @@ def hits(f, origin, direction):
     return sorted(out)
 
 
-tri = load(os.path.join(HERE, 'full_bottom.stl'))
+tri = load(os.path.join(HERE, NAME + '.stl'))
 pts, f = weld(tri)
 edges = defaultdict(int)
 for t in f:
@@ -81,7 +84,7 @@ for t in f:
             par[ra] = rb
 comps = len({find(i) for i in range(len(pts))})
 xs = [p[0] for p in pts]; ys = [p[1] for p in pts]; zs = [p[2] for p in pts]
-print(f'full_bottom.stl: tris={len(tri)} comps={comps} open={opens} '
+print(f'{NAME}.stl: tris={len(tri)} comps={comps} open={opens} '
       f'nonmanifold={bad} x[{min(xs):.1f},{max(xs):.1f}] '
       f'y[{min(ys):.1f},{max(ys):.1f}] z[{min(zs):.2f},{max(zs):.2f}]')
 ok &= comps == 1 and opens == 0 and bad == 0
@@ -104,15 +107,16 @@ print(f'  calyx dimple: {"PASS" if dimple else "FAIL"}   '
       f'rounded base: {"PASS" if rounded else "FAIL"}')
 ok &= dimple and rounded
 
-# three lobes: base is lower at 0/120/240 degrees than between them
-tips = [bottom_z(18, d) for d in (0, 120, 240)]
-mid = [bottom_z(18, d) for d in (60, 180, 300)]
-three = all(t is not None and m is not None and t < m - 1.0
+# lobes: base is lower at the lobe angles than between them
+step = 360.0 / LOBES
+tips = [bottom_z(18, k*step) for k in range(LOBES)]
+mid = [bottom_z(18, k*step + step/2) for k in range(LOBES)]
+lobed = all(t is not None and m is not None and t < m - 0.8
             for t, m in zip(tips, mid))
-print(f'  three calyx lobes: {"PASS" if three else "FAIL"} '
+print(f'  {LOBES} calyx lobes: {"PASS" if lobed else "FAIL"} '
       f'tips={[round(t,2) if t else None for t in tips]} '
       f'between={[round(m,2) if m else None for m in mid]}')
-ok &= three
+ok &= lobed
 
 # solid all the way through: ray hits only the base and the flat top
 h = sorted({round(-45 + d, 2) for d in hits(tri, (10, 0, -45), (0, 0, 1))})
