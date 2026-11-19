@@ -43,6 +43,9 @@ electronics. The source STL is never modified.
   shelves and leaf hole; ~2.6 mm bottom wall.
 - `cap_full_apple.stl` is a byte-for-byte copy of `apple_complete_hollow.stl`,
   provided under the cap name. `cap.stl` and `shell.stl` are unchanged.
+- The complete apple's underside is sculpted into a natural apple base: a
+  rounded dome, a soft central calyx dimple and five gentle lobes. Only the
+  outside bottom skin moves; the cavity, windows and holes stay in place.
 
 ## Print
 - Shell: seam-down on the bed.
@@ -52,6 +55,11 @@ electronics. The source STL is never modified.
 ## Build / verify
 ```
 snap run freecad.cmd ./build_hollow.py
+python3 sculpt_bottom.py
+cp apple_complete_hollow.stl cap_full_apple.stl
 python3 verify_hollow.py
 python3 render_hollow.py
 ```
+
+The `.step` files are the pre-sculpt CAD solids; the `.stl` files are the
+printable, naturally sculpted versions.
