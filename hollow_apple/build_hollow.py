@@ -95,6 +95,23 @@ body = op(body, stem, 'fuse', 'stem')
 # 5 mm chain-ring hole through the thickest part of the leaf (right prong)
 body = op(body, Part.makeCylinder(2.5, 20, App.Vector(15.0, -10, 33.3),
                                   App.Vector(0, 1, 0)), 'cut', 'leaf_hole')
+# Natural apple bottom: fill the source mesh's flat ring with a rounded cap,
+# then carve the calyx dimple. The rim is pushed just past the 26.8 mm source
+# ring so the union seam never lands on an existing mesh edge.
+z_base = min(BODY[i][2] for i in body_ids)
+d, r_rim = 7.0, 27.5
+R = (r_rim*r_rim + d*d) / (2*d)
+zc = z_base - d + R
+cap = Part.makeSphere(R, App.Vector(0, 0, zc)).common(
+    Part.makeCylinder(r_rim, 12.5, App.Vector(0, 0, z_base - 12)))
+body = op(body, cap, 'fuse', 'natural_bottom')
+a, depth = 5.0, 3.0
+c = (a*a - depth*depth) / (2*depth)
+body = op(body, Part.makeSphere(c + depth,
+                                App.Vector(0, 0, z_base - d - c)),
+          'cut', 'calyx_dimple')
+body = body.removeSplitter()
+
 inner = build_solid(body_ids, body_faces, CAV)
 shell = op(body, inner, 'cut', 'cavity')
 

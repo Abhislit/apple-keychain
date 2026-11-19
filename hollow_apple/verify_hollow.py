@@ -82,7 +82,7 @@ def hits(pts, f, o, d):
         w = sum(e2[i]*q[i] for i in range(3))/det
         if w > 1e-6:
             out.append(w)
-    return sorted(out)
+    return sorted({round(x, 3) for x in out})
 
 
 def ray(pts, f, label, o, d, ok_fn):
@@ -101,9 +101,9 @@ ok &= oka
 
 print('--- complete hollow apple ---')
 ok &= ray(pa, fa, 'natural bottom closed', (0, 0, -40), (0, 0, 1),
-          lambda h: h and 12 < h[0] < 16)          # outer skin at z ~ -25.9
+          lambda h: h and 7 < h[0] < 14)           # sculpted outer underside
 ok &= ray(pa, fa, 'hollow above bottom', (0, 0, -40), (0, 0, 1),
-          lambda h: len(h) > 1 and 2 < h[1]-h[0] < 5)  # ~2.6 mm bottom wall
+          lambda h: len(h) > 1 and 4 < h[1]-h[0] < 10)  # thick natural bottom
 
 print('--- natural bottom shape ---')
 
@@ -117,17 +117,19 @@ def bottom_z(r, deg=0):
 z0, z8, z26 = (bottom_z(r) for r in (0, 8, 26))
 tips = [bottom_z(18, k*72) for k in range(5)]
 between = [bottom_z(18, k*72 + 36) for k in range(5)]
-dimpled = z0 is not None and z8 is not None and z8 < z0 - 0.4
-lobes = all(t is not None and m is not None and t < m - 1.0
+deep = z0 is not None and z0 < -29
+dimpled = z0 is not None and z8 is not None and z8 < z0 - 1.0
+lobes = all(t is not None and m is not None and t < m - 2.0
             for t, m in zip(tips, between))
-rounded = z26 is not None and between[0] is not None and z26 > between[0] + 0.5
+rounded = z26 is not None and between[0] is not None and z26 > between[0] + 1.0
 print(f'  profile r=0/8/26: {[round(v,2) for v in (z0,z8,z26)]}')
 print(f'  five soft lobes: tips={[round(v,2) for v in tips]} '
       f'between={[round(v,2) for v in between]}')
-print(f'  dimple: {"PASS" if dimpled else "FAIL"}   '
+print(f'  deep base: {"PASS" if deep else "FAIL"}   '
+      f'dimple: {"PASS" if dimpled else "FAIL"}   '
       f'lobes: {"PASS" if lobes else "FAIL"}   '
       f'rounded: {"PASS" if rounded else "FAIL"}')
-ok &= dimpled and lobes and rounded
+ok &= deep and dimpled and lobes and rounded
 
 print('--- openings / clearances ---')
 ok &= ray(ps, fs, 'OLED active window open', (0, -45, 0), (0, 1, 0),

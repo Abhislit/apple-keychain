@@ -1,7 +1,7 @@
-"""Shape the complete hollow apple's flat underside into a natural apple base.
+"""Add five soft calyx lobes to the rounded bottom made by build_hollow.py.
 
-Runs after build_hollow.py. Only the outer bottom skin moves; the inner cavity,
-openings and every other part of the apple stay exactly where they are.
+Runs after build_hollow.py. Only the outer bottom skin moves; the cavity,
+openings and the rest of the apple stay exactly as built.
 """
 import math
 import os
@@ -28,11 +28,9 @@ for i in range(n):
         x, y, z = struct.unpack_from('<3f', data, o)
         r = math.hypot(x, y)
         wz = 1 - smooth(-25.5, -24.0, z)      # outer bottom skin only
-        dome = 3.0 * (1 - smooth(0, 28, r))    # rounded shoulders
-        dimple = 3.0 * (1 - smooth(0, 5, r))   # calyx pit at the centre
-        lobe = (3.0 * (0.5 + 0.5 * math.cos(5 * math.atan2(y, x))) *
-                smooth(6, 12, r) * (1 - smooth(22, 28, r)))
-        z -= wz * (dome + lobe - dimple)
+        lobe = (6.0 * (0.5 + 0.5 * math.cos(5 * math.atan2(y, x))) *
+                smooth(8, 12, r) * (1 - smooth(22, 28, r)))
+        z -= wz * lobe
         struct.pack_into('<3f', data, o, x, y, z)
         tri.append((x, y, z))
     a, b, c = tri
@@ -46,4 +44,4 @@ for i in range(n):
 
 with open(PATH, 'wb') as fh:
     fh.write(data)
-print(f'sculpted natural bottom into {NAME}.stl ({n} facets)')
+print(f'sculpted five soft lobes into {NAME}.stl ({n} facets)')
