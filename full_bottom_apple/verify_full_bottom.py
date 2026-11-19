@@ -85,13 +85,26 @@ print(f'full_bottom.stl: tris={len(tri)} comps={comps} open={opens} '
       f'nonmanifold={bad} x[{min(xs):.1f},{max(xs):.1f}] '
       f'y[{min(ys):.1f},{max(ys):.1f}] z[{min(zs):.2f},{max(zs):.2f}]')
 ok &= comps == 1 and opens == 0 and bad == 0
-ok &= abs(min(zs) + 25.94) < 0.3 and abs(max(zs)) < 0.3   # bottom half, flat at z=0
+ok &= abs(min(zs) + 28.94) < 0.4 and abs(max(zs)) < 0.3   # rounded base, flat top at z=0
 ok &= max(xs) > 33 and max(ys) > 33                        # full width retained
 
-# solid all the way through: center ray hits only bottom skin + flat top
-h = hits(tri, (0, 0, -40), (0, 0, 1))
-print(f'  solid through centre: {"PASS" if len(h) == 2 else "FAIL"} '
-      f'z={[round(-40+d, 2) for d in h]}')
+# sculpted base: dimple at the centre, rounded shoulders out to the apple wall
+def bottom_z(r):
+    h = hits(tri, (r, 0, -45), (0, 0, 1))
+    return -45 + h[0] if h else None
+
+z0, z4, z20, z26 = (bottom_z(r) for r in (0, 4, 20, 26))
+profile = [round(v, 2) if v is not None else None for v in (z0, z4, z20, z26)]
+print(f'  base profile at r=0,4,20,26: {profile}')
+dimple = z0 is not None and z4 is not None and z4 < z0 - 1.0
+rounded = z20 is not None and z26 is not None and z20 < z26 - 0.8
+print(f'  calyx dimple: {"PASS" if dimple else "FAIL"}   '
+      f'rounded base: {"PASS" if rounded else "FAIL"}')
+ok &= dimple and rounded
+
+# solid all the way through: ray hits only the base and the flat top
+h = sorted({round(-45 + d, 2) for d in hits(tri, (10, 0, -45), (0, 0, 1))})
+print(f'  solid through body: {"PASS" if len(h) == 2 else "FAIL"} z={h}')
 ok &= len(h) == 2
 
 digest = hashlib.sha256(open(os.path.join(HERE, 'apple_original.stl'), 'rb').read()).hexdigest()

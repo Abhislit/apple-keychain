@@ -1,8 +1,9 @@
 """Solid bottom half of the apple: original shape, uniform scale, no internals.
 
-Only the body's lower half (z <= 0 after centering) is kept. There is no
-cavity, shelf, tab, window or hole, and no stem/leaf. The source apple is
-never modified. Runs: snap run freecad.cmd ./build_full_bottom.py
+Only the body's lower half (z <= 0 after centering) is kept. The source
+mesh's flat base is rounded off and given a calyx dimple so it reads as a
+real apple bottom. No cavity, shelf, tab, window or hole, and no stem/leaf.
+The source apple is never modified. Runs: snap run freecad.cmd ./build_full_bottom.py
 """
 import FreeCAD as App
 import Part, Mesh, MeshPart, os
@@ -61,6 +62,40 @@ lower = body.common(Part.makeBox(300, 300, 150, App.Vector(-150, -150, -150)))
 # operation turns this otherwise valid solid invalid.
 print(f'lower half: valid={lower.isValid()} solids={len(lower.Solids)} '
       f'vol={lower.Volume/1000:.2f} bbox={lower.BoundBox}', flush=True)
+if not lower.isValid() or len(lower.Solids) != 1:
+    raise SystemExit(9)
+
+# The source apple has a flat base ring (r ~ 2.7..26.8 at z = -25.94).
+# Add a spherical cap below it: lower surface 3 mm deeper at the centre,
+# flush with the ring at r = 26.8. The cylinder limits the cap to that ring;
+# the extra 0.5 mm overlap makes the fuse robust.
+z_base = lower.BoundBox.ZMin
+d, r_rim = 3.0, 27.5   # just past the source mesh's 26.8 mm bottom ring,
+                       # so the union seam never lands on an existing edge
+R = (r_rim*r_rim + d*d) / (2*d)
+zc = z_base - d + R
+cap = Part.makeSphere(R, App.Vector(0, 0, zc)).common(
+    Part.makeCylinder(r_rim, 10.5, App.Vector(0, 0, z_base - 10)))
+lower = lower.fuse(cap)
+print(f'rounded base: valid={lower.isValid()} solids={len(lower.Solids)} '
+      f'vol={lower.Volume/1000:.3f}', flush=True)
+if not lower.isValid() or len(lower.Solids) != 1:
+    raise SystemExit(9)
+
+# Calyx dimple: a 4 mm radius, 2 mm deep crater at the centre of the base.
+z_low = z_base - d
+a, depth = 4.0, 2.0
+c = (a*a - depth*depth) / (2*depth)
+lower = lower.cut(Part.makeSphere(c + depth, App.Vector(0, 0, z_low - c)))
+print(f'calyx dimple: valid={lower.isValid()} solids={len(lower.Solids)} '
+      f'vol={lower.Volume/1000:.2f}', flush=True)
+if not lower.isValid() or len(lower.Solids) != 1:
+    raise SystemExit(9)
+
+# the fuse leaves split faces at the base seam; merge them before meshing
+lower = lower.removeSplitter()
+print(f'refined: valid={lower.isValid()} solids={len(lower.Solids)} '
+      f'vol={lower.Volume/1000:.3f}', flush=True)
 if not lower.isValid() or len(lower.Solids) != 1:
     raise SystemExit(9)
 
