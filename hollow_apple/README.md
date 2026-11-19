@@ -41,6 +41,8 @@ electronics. The source STL is never modified.
   `apple_complete_hollow.stl` — the **whole apple as one hollow piece** with its
   natural bottom closed and no flat cut seam. Same window, power, switch,
   shelves and leaf hole; ~2.6 mm bottom wall.
+- `cap_full_apple.stl` is a byte-for-byte copy of `apple_complete_hollow.stl`,
+  provided under the cap name. `cap.stl` and `shell.stl` are unchanged.
 
 ## Print
 - Shell: seam-down on the bed.
