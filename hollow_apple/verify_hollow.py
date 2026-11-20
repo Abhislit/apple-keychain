@@ -18,6 +18,14 @@ def load(path):
              (struct.unpack('<12fH', d[84+50*i:84+50*i+50])[9:12])) for i in range(n)]
 
 
+BED_Z0 = {'shell': -20.0, 'cap': -25.938, 'stem_leaf': 20.2}
+
+
+def shift(tri, dz):
+    """Undo bed alignment so the assembly-coordinate geometry checks still work."""
+    return [tuple((p[0], p[1], p[2] + dz) for p in t) for t in tri]
+
+
 def weld(tri, q=1e-4):
     ids, pts = {}, []
 
@@ -92,8 +100,10 @@ def ray(pts, f, label, o, d, ok_fn):
     return ok
 
 
-ps, fs, ok = report('shell.stl', load(os.path.join(HERE, 'shell.stl')))
-pc, fc, okc = report('cap.stl', load(os.path.join(HERE, 'cap.stl')))
+ps, fs, ok = report('shell.stl', shift(load(os.path.join(HERE, 'shell.stl')),
+                                       BED_Z0['shell']))
+pc, fc, okc = report('cap.stl', shift(load(os.path.join(HERE, 'cap.stl')),
+                                      BED_Z0['cap']))
 ok &= okc
 pa, fa, oka = report('apple_complete_hollow.stl',
                      load(os.path.join(HERE, 'apple_complete_hollow.stl')))
@@ -109,7 +119,8 @@ ok &= no_stem
 
 stem_path = os.path.join(HERE, 'stem_leaf.stl')
 if os.path.exists(stem_path):
-    psl, fsl, oksl = report('stem_leaf.stl', load(stem_path))
+    psl, fsl, oksl = report('stem_leaf.stl', shift(load(stem_path),
+                                                  BED_Z0['stem_leaf']))
     ok &= oksl
     ok &= ray(psl, fsl, 'leaf hole open', (15.0, -20, 33.3), (0, 1, 0),
               lambda h: not any(-6 < -20 + d < 6 for d in h))
@@ -190,6 +201,14 @@ for name, x, z, y0, y1, needs_front in (
     good = back is not None and (front is not None or not needs_front)
     print(f'  {name}: {"PASS" if good else "FAIL"} front wall={front} '
           f'part={y0}..{y1} back wall={back}')
+    ok &= good
+
+print('--- print bed alignment ---')
+for name in ('cap.stl', 'shell.stl', 'stem_leaf.stl'):
+    raw = load(os.path.join(HERE, name))
+    zmin = min(p[2] for t in raw for p in t)
+    good = abs(zmin) < 0.01
+    print(f'  {name} lowest z={zmin:.3f}: {"PASS" if good else "FAIL"}')
     ok &= good
 
 print('--- STEP geometry ---')

@@ -38,8 +38,8 @@ electronics. The source STL is never modified.
 - The stem and leaf are **not part of the apple outputs**. They are exported
   separately as `stem_leaf.stl` and `stem_leaf.step`, retaining the 5 mm
   chain-ring hole through the thickest part of the leaf (right prong,
-  x = 15, z = 33.3) with about 2.7 mm of wall around it. Its small base is
-  capped at z ~ 20.2 so the printable part is watertight.
+  x = 15, z = 33.3 in assembly coordinates) with about 2.7 mm of wall around
+  it. Its small base is capped so the printable part is watertight.
 - Outputs: `shell.stl` (apple above the seam), `cap.stl` (bottom closure), and
   `apple_complete_hollow.stl` — the **whole apple as one hollow piece** with its
   natural bottom closed and no flat cut seam. Same window, power, switch and
@@ -49,13 +49,14 @@ electronics. The source STL is never modified.
 - Only the complete apple's underside is a real apple base: `build_hollow.py`
   adds a rounded cap and central calyx dimple to the one-piece apple, and
   `sculpt_bottom.py` adds five soft lobes to its STL. The two-piece `shell.stl`
-  and `cap.stl` keep the original flat seam at z = -20, so the cap prints flat
-  on the bed.
+  and `cap.stl` keep the original flat seam.
 
 ## Print
-- Shell: seam-down on the bed.
-- Cap: seam-down as well (flat face on the bed, curved apple bottom upward).
-- Both are watertight single solids; no supports needed.
+- `cap.stl`, `shell.stl` and `stem_leaf.stl` are exported **bed-aligned**: each
+  one's lowest point sits at z = 0, so all three can be dropped straight into a
+  slicer. The complete-apple files stay in assembly coordinates.
+- Shell: seam-down on the bed. Cap: flat face down. Stem/leaf: small base down.
+- All are watertight single solids; no supports needed.
 
 ## Build / verify
 ```

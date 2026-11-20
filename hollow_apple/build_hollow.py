@@ -145,8 +145,10 @@ complete = op(complete, Part.makeSphere(c + depth,
 complete = complete.removeSplitter()
 
 
-def save(shape, name):
+def save(shape, name, to_bed=False):
     shape = shape.removeSplitter()
+    if to_bed:
+        shape.translate(App.Vector(0, 0, -shape.BoundBox.ZMin))
     print(f'{name}: valid={shape.isValid()} solids={len(shape.Solids)} '
           f'vol={shape.Volume/1000:.2f} bbox={shape.BoundBox}', flush=True)
     shape.exportStep(os.path.join(OUT, name + '.step'))
@@ -160,8 +162,8 @@ def save(shape, name):
 
 # the complete apple is hollow inside with a natural bottom; shell + cap stay flat
 save(complete, 'apple_complete_hollow')
-save(parts, 'shell')
-save(cap, 'cap')
-save(stem_leaf, 'stem_leaf')
+save(parts, 'shell', to_bed=True)
+save(cap, 'cap', to_bed=True)
+save(stem_leaf, 'stem_leaf', to_bed=True)
 print(f'overlap vol={parts.common(cap).Volume:.4f} mm3', flush=True)
 print('done', flush=True)
