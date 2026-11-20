@@ -170,6 +170,13 @@ ok &= ray(ps, fs, 'open at bottom seam', (0, 0, -35), (0, 0, 1),
           lambda h: h and h[0] > 8)                  # no floor at the seam
 ok &= ray(pc, fc, 'cap has a floor', (0, 0, -40), (0, 0, 1),
           lambda h: h and h[0] < 18)
+cap_z = [(-40 + h[0]) if h else None for r in (0, 8, 18, 26)
+         for h in [hits(pc, fc, (r, 0, -40), (0, 0, 1))]]
+cap_flat = (all(z is not None and -26.5 < z < -25.0 for z in cap_z) and
+            max(cap_z) - min(cap_z) < 0.5)
+print(f'  cap flat base: {"PASS" if cap_flat else "FAIL"} '
+      f'z={[round(z, 2) if z is not None else None for z in cap_z]}')
+ok &= cap_flat
 
 print('--- component envelopes ---')
 # The D1 corner sits inside the OLED window, so it has no front wall by design.
