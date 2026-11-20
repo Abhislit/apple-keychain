@@ -90,11 +90,14 @@ def build_solid(ids, fcs, coords):
 
 # ---------------------------------------------------------------- shell
 body = build_solid(body_ids, body_faces, BODY)
-stem = build_solid(stem_ids, stem_faces, STEM)
-body = op(body, stem, 'fuse', 'stem')
+stem_leaf = build_solid(stem_ids, stem_faces, STEM)
 # 5 mm chain-ring hole through the thickest part of the leaf (right prong)
-body = op(body, Part.makeCylinder(2.5, 20, App.Vector(15.0, -10, 33.3),
-                                  App.Vector(0, 1, 0)), 'cut', 'leaf_hole')
+stem_leaf = op(stem_leaf, Part.makeCylinder(2.5, 20, App.Vector(15.0, -10, 33.3),
+                                           App.Vector(0, 1, 0)),
+               'cut', 'leaf_hole')
+# the source component is open where it met the body; close that tiny base
+stem_leaf = op(stem_leaf, box(-1.5, 2.0, -4.5, -3.0, 20.2, 21.0),
+               'fuse', 'stem_base')
 # Natural apple bottom: fill the source mesh's flat ring with a rounded cap,
 # then carve the calyx dimple. The rim is pushed just past the 26.8 mm source
 # ring so the union seam never lands on an existing mesh edge.
@@ -147,7 +150,7 @@ def save(shape, name):
     shape = shape.removeSplitter()
     print(f'{name}: valid={shape.isValid()} solids={len(shape.Solids)} '
           f'vol={shape.Volume/1000:.2f} bbox={shape.BoundBox}', flush=True)
-    Part.export([shape], os.path.join(OUT, name + '.step'))
+    shape.exportStep(os.path.join(OUT, name + '.step'))
     mesh = MeshPart.meshFromShape(Shape=shape, LinearDeflection=0.06,
                                   AngularDeflection=0.4, Relative=False)
     path = os.path.join(OUT, name + '.stl')
@@ -160,5 +163,6 @@ def save(shape, name):
 save(shell, 'apple_complete_hollow')
 save(parts, 'shell')
 save(cap, 'cap')
+save(stem_leaf, 'stem_leaf')
 print(f'overlap vol={parts.common(cap).Volume:.4f} mm3', flush=True)
 print('done', flush=True)

@@ -99,6 +99,26 @@ pa, fa, oka = report('apple_complete_hollow.stl',
                      load(os.path.join(HERE, 'apple_complete_hollow.stl')))
 ok &= oka
 
+print('--- stem / leaf split ---')
+body_top = max(p[2] for p in pa)
+shell_top = max(p[2] for p in ps)
+no_stem = body_top < 28 and shell_top < 28
+print(f'  apple body top z={body_top:.2f}, shell top z={shell_top:.2f}: '
+      f'{"PASS" if no_stem else "FAIL"}')
+ok &= no_stem
+
+stem_path = os.path.join(HERE, 'stem_leaf.stl')
+if os.path.exists(stem_path):
+    psl, fsl, oksl = report('stem_leaf.stl', load(stem_path))
+    ok &= oksl
+    ok &= ray(psl, fsl, 'leaf hole open', (15.0, -20, 33.3), (0, 1, 0),
+              lambda h: not any(-6 < -20 + d < 6 for d in h))
+    ok &= ray(psl, fsl, 'leaf wall beside hole', (15.0, -20, 36.5), (0, 1, 0),
+              lambda h: any(-6 < -20 + d < 6 for d in h))
+else:
+    print('stem_leaf.stl: FAIL (missing)')
+    ok = False
+
 print('--- complete hollow apple ---')
 ok &= ray(pa, fa, 'natural bottom closed', (0, 0, -40), (0, 0, 1),
           lambda h: h and 7 < h[0] < 14)           # sculpted outer underside
@@ -151,12 +171,6 @@ ok &= ray(ps, fs, 'open at bottom seam', (0, 0, -35), (0, 0, 1),
 ok &= ray(pc, fc, 'cap has a floor', (0, 0, -40), (0, 0, 1),
           lambda h: h and h[0] < 18)
 
-print('--- chain-ring hole ---')
-ok &= ray(ps, fs, 'leaf hole open', (15.0, -20, 33.3), (0, 1, 0),
-          lambda h: not any(-6 < -20 + d < 6 for d in h))
-ok &= ray(ps, fs, 'leaf wall beside hole', (15.0, -20, 36.5), (0, 1, 0),
-          lambda h: any(-6 < -20 + d < 6 for d in h))
-
 print('--- component envelopes ---')
 # The D1 corner sits inside the OLED window, so it has no front wall by design.
 for name, x, z, y0, y1, needs_front in (
@@ -169,6 +183,14 @@ for name, x, z, y0, y1, needs_front in (
     good = back is not None and (front is not None or not needs_front)
     print(f'  {name}: {"PASS" if good else "FAIL"} front wall={front} '
           f'part={y0}..{y1} back wall={back}')
+    ok &= good
+
+print('--- STEP geometry ---')
+for name in ('stem_leaf', 'shell', 'cap', 'apple_complete_hollow'):
+    path = os.path.join(HERE, name + '.step')
+    txt = open(path).read() if os.path.exists(path) else ''
+    good = 'MANIFOLD_SOLID_BREP' in txt
+    print(f'  {name}.step: {"PASS" if good else "FAIL"}')
     ok &= good
 
 h = hashlib.sha256(open(os.path.join(HERE, 'apple_original.stl'), 'rb').read()).hexdigest()

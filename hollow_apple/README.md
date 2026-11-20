@@ -25,7 +25,7 @@ electronics. The source STL is never modified.
    wall, with the same margin on the battery. Shape is unchanged; only size.
 
 ## Design (approved approach)
-- Body and stem are uniformly scaled 1.50x; inner cavity is the same mesh at
+- The apple body is uniformly scaled 1.50x; inner cavity is the same mesh at
   0.90 of the scaled outer (about 2.8 mm wall at the widest point).
 - Flat seam at z = -20; everything below it is the removable cap.
 - Front window sized to the OLED's **active area only**, 29.42 x 14.7 mm
@@ -35,14 +35,17 @@ electronics. The source STL is never modified.
   centred at z = 12.5 so it does not line up with the display window.
 - Slide switch: 9 x 3 mm actuator slot in the right-hand wall.
 - Two small internal shelves (OLED edge tabs + electronics platform).
-- 5 mm chain-ring hole through the thickest part of the leaf (right prong,
-  x = 15, z = 33.3), with about 2.7 mm of wall around it.
+- The stem and leaf are **not part of the apple outputs**. They are exported
+  separately as `stem_leaf.stl` and `stem_leaf.step`, retaining the 5 mm
+  chain-ring hole through the thickest part of the leaf (right prong,
+  x = 15, z = 33.3) with about 2.7 mm of wall around it. Its small base is
+  capped at z ~ 20.2 so the printable part is watertight.
 - Outputs: `shell.stl` (apple above the seam), `cap.stl` (bottom closure), and
   `apple_complete_hollow.stl` — the **whole apple as one hollow piece** with its
-  natural bottom closed and no flat cut seam. Same window, power, switch,
-  shelves and leaf hole; ~2.6 mm bottom wall.
+  natural bottom closed and no flat cut seam. Same window, power, switch and
+  shelves; no stem or leaf; ~2.6 mm bottom wall.
 - `cap_full_apple.stl` is a byte-for-byte copy of `apple_complete_hollow.stl`,
-  provided under the cap name. `cap.stl` and `shell.stl` are unchanged.
+  provided under the cap name.
 - The complete apple's underside is now a real apple base: `build_hollow.py`
   adds a rounded cap and central calyx dimple before hollowing, and
   `sculpt_bottom.py` adds five soft lobes to the STL. The cavity, windows and
@@ -62,5 +65,6 @@ python3 verify_hollow.py
 python3 render_hollow.py
 ```
 
-The `.step` files include the rounded cap and calyx dimple but not the five
-lobes; the `.stl` files are the fully sculpted, printable versions.
+The apple `.step` files include the rounded cap and calyx dimple but not the
+five lobes; the `.stl` files are the fully sculpted, printable versions.
+`stem_leaf.step` matches `stem_leaf.stl`.
